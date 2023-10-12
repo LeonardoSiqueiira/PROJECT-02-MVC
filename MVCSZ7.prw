@@ -1,5 +1,5 @@
-#INCLUDE 'Protheus.ch'
-#INCLUDE 'FwMvcDef.ch'
+#INCLUDE 'PROTHEUS.ch'
+#INCLUDE 'FWMVCDEF.ch'
 
 /*/{Protheus.doc} User Function MVCSZ7
     Função principal para a construção de tela de Requisição de Compras
@@ -12,22 +12,35 @@
     /*/
 
 User Function MVCSZ7()
-Local aArea                     := GetArea()
-Local oBrowse                   := FwmBrowse():New()          // FARA O INSTANCIAMENTO DA CLASSE FWMBROWSE
+Local aArea                        := GetArea()
+Local oBrowseSZ7
+oBrowseSZ7                         := FWMBROWSE():New()          // FARA O INSTANCIAMENTO DA CLASSE FWMBROWSE
 
-oBrowse:SetAlias("SZ7")
-oBrowse:SetDescription("Requisição de Compras")
+oBrowseSZ7:SetAlias("SZ7")
+oBrowseSZ7:SetDescription("Requisição de Compras")
 
-
-oBrowse:Activate(aArea)
+oBrowseSZ7:ACTIVATE()
+RestArea(aArea)
 
 Return
 
+
+Static Function MenuDef()
+Local aRotina                    := FwMvcMenu("MVCSZ7")
+
+
+Return aRotina
+
+
 // STATIC FUNCITON RESPONSAVEL PELO MODELO DE DADOS
 Static Function ModelDef()
-Local oModel                     := MPFormModel("MVCSZ7m")                              // OBJETVO PRINCIPAL DO DESENVOLVIMENTO MVC MOD 2, TRAZ AS CARACTERISTICAS DO DICIOMARIO DE DADOS
-Local oStCabec                   := FWFormModelStruct():New()                           // RESPONSAVEL PELA ESTRUTURA TEMPORARIA DO CABEÇALHO
-Local oStItens                   := FWFormStruct(1, "SZ7"):New()                        // RESPONSAVEL PELA ESTRUTURA DO ITEM
+Local oModel                     
+Local oStCabec                   := FWFormModelStruct():New()                  // RESPONSAVEL PELA ESTRUTURA TEMPORARIA DO CABEÇALHO
+Local oStItens                   := FWFormStruct(1, "SZ7")                     // RESPONSAVEL PELA ESTRUTURA DO ITEM
+
+Local bVldCom                    := {|| u_GrvSZ7()}                            // CHAMADA DA USER FUNCTION QUE VALIDARA A INCLUSÃO/EXCLUSÃO E ALTERAÇÃO
+
+oModel                           := MPFormModel():New("MVCSZ7m",,,bVldCom,)               // OBJETVO PRINCIPAL DO DESENVOLVIMENTO MVC MOD 2, TRAZ AS CARACTERISTICAS DO DICIOMARIO DE DADOS
 
 
 
@@ -84,8 +97,8 @@ FwBuildFeature( STRUCT_FEATURE_INIPAD, "Iif(!INCLUI, SZ7-> Z7_EMISSAO, dDataBase
 .F.)
 
 oStCabec:AddField(;
-"FORNECEDOR",;
-"FORNECEDOR",;
+"Fornecedor",;
+"Fornecedor",;
 "Z7_FORNE",;
 "C",;
 TamSX3("Z7_FORNE")[1],;
@@ -152,7 +165,7 @@ oModel:SetRelation("SZ7DETAIL",{{"Z7_FILIAL", "'Iif(!INCLUI, SZ7-> Z7_FILIAL,FWx
 // SETO A CHAVE PRIMARIA
 oModel:SetPrimaryKey({})
 
-oModel:GetModel("SZ7DETAIL"):SetUniqueLine("Z7_ITEM")  // O OBJETIVO É QUE ESSE CAMPO NÃO SE REPITA
+oModel:GetModel("SZ7DETAIL"):SetUniqueLine({"Z7_ITEM"})  // O OBJETIVO É QUE ESSE CAMPO NÃO SE REPITA
 
 
 // SETAMOS A DESCRIÇÃO QUE APARECERÁ NO GRID DE ITENS E CABEÇALHO
@@ -164,3 +177,166 @@ oModel:GetModel("SZ7DETAIL"):SetUseOldGrid(.T.)        // FINALIZO SETANDO O MOD
 
 
 Return oModel
+
+// OBJETO DE VISUALIZAÇÃO DO MVC
+Static Function ViewDef()
+Local oView                     := NIL
+
+// REALIZO O LOAD DO MODEL REFERENTE A FUNÇÃO MVCSZ7
+Local oModel                    := FwLoadModel("MVCSZ7")        
+
+Local oStCabec                  := FWFORMVIEWSTRUCT():New()     // RESPONSAVEL POR MONTAR A ESTRUTURA TEMPORARIA DO CABEÇALHO DA VIEW
+Local oStItens                  := FWFormStruct(2,"SZ7")       // RESPONSAVEL POR MONTAR A PARTE DE ESTRUTURA DOS ITENS/GRID
+
+
+// CRIANDO DENTRO DA ESTRUTURA DA VIEW OS CAMPOS DO CABEÇALHO
+oStCabec:AddField(;
+"Z7_NUM",;
+"01",;
+"Pedido",;
+X3Descric("Z7_NUM"),;
+Nil,;
+"C",;
+X3Picture("Z7_NUM"),;
+Nil,;
+Nil,;
+Iif(INCLUI, .T., .F.),;
+Nil,;
+Nil,;
+Nil,;
+Nil,;
+Nil,;
+Nil,;
+Nil,;
+Nil)
+
+oStCabec:AddField(;
+"Z7_EMISSAO",;
+"02",;
+"Emissao",;
+X3Descric("Z7_EMISSAO"),;
+Nil,;
+"D",;
+X3Picture("Z7_EMISSAO"),;
+Nil,;
+Nil,;
+Iif(INCLUI, .T., .F.),;
+Nil,;
+Nil,;
+Nil,;
+Nil,;
+Nil,;
+Nil,;
+Nil,;
+Nil)
+
+oStCabec:AddField(;
+"Z7_FORNE",;
+"03",;
+"Fornecedor",;
+X3Descric("Z7_FORNE"),;
+Nil,;
+"C",;
+X3Picture("Z7_FORNE"),;
+Nil,;
+"SF2",;
+Iif(INCLUI, .T., .F.),;
+Nil,;
+Nil,;
+Nil,;
+Nil,;
+Nil,;
+Nil,;
+Nil,;
+Nil)
+
+oStCabec:AddField(;
+"Z7_LOJA",;
+"04",;
+"Loja",;
+X3Descric("Z7_LOJA"),;
+Nil,;
+"C",;
+X3Picture("Z7_LOJA"),;
+Nil,;
+Nil,;
+Iif(INCLUI, .T., .F.),;
+Nil,;
+Nil,;
+Nil,;
+Nil,;
+Nil,;
+Nil,;
+Nil,;
+Nil,;
+)
+
+oStCabec:AddField(;
+"Z7_USER",;
+"05",;
+"User",;
+X3Descric("Z7_USER"),;
+Nil,;
+"C",;
+X3Picture("Z7_USER"),;
+Nil,;
+Nil,;
+.F.,;
+Nil,;
+Nil,;
+Nil,;
+Nil,;
+Nil,;
+Nil,;
+Nil,;
+Nil,;
+)
+
+oStItens:RemoveField("Z7_NUM")
+oStItens:RemoveField("Z7_EMISSAO")
+oStItens:RemoveField("Z7_FORNE")
+oStItens:RemoveField("Z7_LOJA")
+oStItens:RemoveField("Z7_USER")
+
+// AMARRAÇÃO DAS ESTRUTURAS DE DADOS MONTADAS ACIMA COM O OBJETO VIEW, E PASSAMOS PARA A APLICAÇÃO AS CARACTERISTICAS VISUAIS
+
+// INSTANCIO A CLASSE FWFORM VIEW E PASSO PARA O OBJETO O MODELO DE DADOS QUE VAI ATRELAR A ELE. ( MODELO + VISUALIZAÇÃO )
+oView                           := FwFormView():New()
+oView:SetModel(oModel)
+
+// MONTO A ESTRUTURA DE VISUALIZAÇÃO DO MASTER E DO DETALHE
+oView:AddField("VIEW_SZ7M",oStCabec,"SZ7MASTER") // CABEÇALHO
+oView:AddGrid("VIEW_SZ7D", oStItens, "SZ7DETAIL") // ITENS/GRID
+
+// CRIANDO TELA
+
+oView:CreateHorizontalBox("CABEC",30)
+oView:CreateHorizontalBox("GRID", 60)
+
+// DIZENDO PARA OONDE CADA VIEW CRIADA .. ASSOCIANDO O VIEW A CADA BOX CRIADO
+oView:SetOwnerView("VIEW_SZ7M", "CABEC")
+oView:SetOwnerView("VIEW_SZ7D", "GRID")
+
+// ATIVAR O TITULO DE CADA VIEW CRIADA
+oView:EnableTitleView("VIEW_SZ7M", "Cabeçalho Requisição de Compras")
+oView:EnableTitleView("VIEW_SZ7D", "Itens Requisição de Compras")
+
+oView:SetCloseOnOk({|| .T.}) // UTILIZADO PARA VERIFCAR SE A JANELA DEVE OU NÃO SER FECHADA APOS O OK
+
+Return oView
+
+
+User Function GrvSZ7()
+
+Local aArea                     := GetArea()
+Local oModel                    := FwModelActive()                  // CAPTURO O MODELO ATIVO QUE ESTA SENDO MANIPULADO
+
+// CRIAR MODELO DE DADOS MASTER/CABEÇALHO
+Local oModelCabe                := oModel:GetModel("SZ7MASTER")     // CARREGANDO MODELO DO CABEÇALHO
+Local oModelItem                := oModel:getModel("SZ7DETAIL")     // CARREGANDO MODELO DOS ITENS
+
+
+RestArea(aArea)
+
+
+Return lRet
